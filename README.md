@@ -8,7 +8,7 @@ Example:
     
     pgs = PGSReader('mysubtitles.sup')
     
-    rle_bmps = [segment.img_data for s in pgs.segments if isinstance(s, ObjectDefinitionSegment)]
+    rle_bmps = [s.img_data for s in pgs.segments if isinstance(s, ObjectDefinitionSegment)]
     
 rle_bmps will be a list of bytestrings containing the RLE-encoded bitmap bytes of images defined in the file.
 
