@@ -40,35 +40,23 @@ class BaseSegment:
         self.bytes = bytes_
         if bytes_[:2] != b'PG':
             raise InvalidSegmentException
-        self._pts = int(bytes_[2:6].hex(), base=16)/90
-        self._dts = int(bytes_[6:10].hex(), base=16)/90
-        self._type = self.SEGMENT[bytes_[10]]
-        self._size = int(bytes_[11:13].hex(), base=16)
+        self.pts = int(bytes_[2:6].hex(), base=16)/90
+        self.dts = int(bytes_[6:10].hex(), base=16)/90
+        self.type = self.SEGMENT[bytes_[10]]
+        self.size = int(bytes_[11:13].hex(), base=16)
         self.data = bytes_[13:]
 
     def __len__(self):
-        return self._size
+        return self.size
 
     @property
-    def pts(self): return self._pts
+    def presentation_timestamp(self): return self.pts
 
     @property
-    def presentation_timestamp(self): return self._pts
+    def decoding_timestamp(self): return self.dts
 
     @property
-    def dts(self): return self._dts
-
-    @property
-    def decoding_timestamp(self): return self._dts
-
-    @property
-    def type(self): return self._type
-
-    @property
-    def segment_type(self): return self._type
-
-    @property
-    def size(self): return self._size
+    def segment_type(self): return self.type
 
 class PresentationCompositionSegment(BaseSegment):
 
