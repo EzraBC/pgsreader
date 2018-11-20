@@ -1,6 +1,12 @@
 class InvalidSegmentException(Exception):
     '''raised when a segment does not match PGS specification'''
 
+PDS = int('0x14', 16)
+ODS = int('0x15', 16)
+PCS = int('0x16', 16)
+WDS = int('0x17', 16)
+END = int('0x80', 16)
+
 class PGSReader:
 
     def __init__(self, filepath):
@@ -10,30 +16,42 @@ class PGSReader:
     def make_segment(self, bytes_):
         cls = SEGMENT_TYPE[bytes_[10]]
         return cls(bytes_)
-    
-    def get_segments(self, bytes_):
-        segments = []
+
+    def iter_segments(self):
+        bytes_ = self.bytes[:]
         while bytes_:
-            size = 13 + int(bytes_[11:13].hex(), base=16)
-            segments.append(self.make_segment(bytes_[:size]))
+            size = 13 + int(bytes_[11:13].hex(), 16)
+            yield self.make_segment(bytes_[:size])
             bytes_ = bytes_[size:]
-        return segments
+
+    def iter_displaysets(self):
+        ds = []
+        for s in self.iter_segments():
+            ds.append(s)
+            if s.type == 'END':
+                yield ds
+                ds = []
 
     @property
     def segments(self):
         if not hasattr(self, '_segments'):
-            self._segments = self.get_segments(self.bytes)
+            self._segments = list(self.iter_segments())
         return self._segments
 
+    @property
+    def displaysets(self):
+        if not hasattr(self, '_displaysets'):
+            self._displaysets = list(self.iter_displaysets())
+        return self._displaysets
 
 class BaseSegment:
 
     SEGMENT = {
-        int('0x14', base=16): 'PDS',
-        int('0x15', base=16): 'ODS',
-        int('0x16', base=16): 'PCS',
-        int('0x17', base=16): 'WDS',
-        int('0x80', base=16): 'END'
+        PDS: 'PDS',
+        ODS: 'ODS',
+        PCS: 'PCS',
+        WDS: 'WDS',
+        END: 'END'
     }
     
     def __init__(self, bytes_):
@@ -132,23 +150,10 @@ class PaletteDefinitionSegment(BaseSegment):
         BaseSegment.__init__(self, bytes_)
         self.palette_id = self.data[0]
         self.version = self.data[1]
-        self.entry_id = self.data[2]
-        self.y = self.data[3]
-        self.cr = self.data[4]
-        self.cb = self.data[5]
-        self.alpha = self.data[6]
-
-    @property
-    def luminance(self): return self.y
-
-    @property
-    def color_diff_red(self): return self.cr
-
-    @property
-    def color_diff_blue(self): return self.cb
-
-    @property
-    def transparency(self): return self.alpha
+        self.palette = [(0, 0, 0, 0)]*256
+        for entry in range(len(self.data[2:])//5):
+            i = 2 + entry*5
+            self.palette[self.data[i]] = tuple(self.data[i+1:i+5])
 
 class ObjectDefinitionSegment(BaseSegment):
 
@@ -177,9 +182,9 @@ class EndSegment(BaseSegment):
     def is_end(self): return True
         
 SEGMENT_TYPE = {
-    int('0x14', base=16): PaletteDefinitionSegment,
-    int('0x15', base=16): ObjectDefinitionSegment,
-    int('0x16', base=16): PresentationCompositionSegment,
-    int('0x17', base=16): WindowDefinitionSegment,
-    int('0x80', base=16): EndSegment
+    PDS: PaletteDefinitionSegment,
+    ODS: ObjectDefinitionSegment,
+    PCS: PresentationCompositionSegment,
+    WDS: WindowDefinitionSegment,
+    END: EndSegment
 }
