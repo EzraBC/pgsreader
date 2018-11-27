@@ -1,4 +1,4 @@
-class InvalidSegmentException(Exception):
+class InvalidSegmentError(Exception):
     '''raised when a segment does not match PGS specification'''
 
 PDS = int('0x14', 16)
@@ -29,7 +29,7 @@ class PGSReader:
         for s in self.iter_segments():
             ds.append(s)
             if s.type == 'END':
-                yield ds
+                yield DisplaySet(ds)
                 ds = []
 
     @property
@@ -57,7 +57,7 @@ class BaseSegment:
     def __init__(self, bytes_):
         self.bytes = bytes_
         if bytes_[:2] != b'PG':
-            raise InvalidSegmentException
+            raise InvalidSegmentError
         self.pts = int(bytes_[2:6].hex(), base=16)/90
         self.dts = int(bytes_[6:10].hex(), base=16)/90
         self.type = self.SEGMENT[bytes_[10]]
@@ -188,3 +188,18 @@ SEGMENT_TYPE = {
     WDS: WindowDefinitionSegment,
     END: EndSegment
 }
+
+class DisplaySet:
+
+    def __init__(self, segments):
+        self.segments = segments
+        self.segment_types = [s.type for s in segments]
+        self.has_image = 'ODS' in self.segment_types
+        
+def segment_by_type_getter(type_):
+    def f(self):
+        return [s for s in self.segments if s.type == type_]
+    return f
+
+for type_ in BaseSegment.SEGMENT.values():
+    setattr(DisplaySet, type_.lower(), property(segment_by_type_getter(type_)))
