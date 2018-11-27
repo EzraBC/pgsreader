@@ -9,13 +9,13 @@ Example:
     
     pgs = PGSReader('mysubtitles.sup')
     
-    # get the first display set (list of segment objects) that contains an image
+    # get the first DisplaySet that contains an image
     display_set = next(ds for ds in pgs.iter_displaysets() if ds.has_image)
     
     # get Palette Display Segment
     pds = display_set.pds[0]
     # get Object Display Segment
-    ods = display_sey.ods[0]
+    ods = display_set.ods[0]
     
     # get the image!
     img = make_image(ods, pds)
