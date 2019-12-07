@@ -7,6 +7,7 @@ PCS = int('0x16', 16)
 WDS = int('0x17', 16)
 END = int('0x80', 16)
 
+
 class PGSReader:
 
     def __init__(self, filepath):
@@ -138,11 +139,12 @@ class WindowDefinitionSegment(BaseSegment):
 
     def __init__(self, bytes_):
         BaseSegment.__init__(self, bytes_)
-        self.window_id = self.data[0]
-        self.x_offset = int(self.data[1:3].hex(), base=16)
-        self.y_offset = int(self.data[3:5].hex(), base=16)
-        self.width = int(self.data[5:7].hex(), base=16)
-        self.height = int(self.data[7:9].hex(), base=16)
+        self.num_windows = self.data[0]
+        self.window_id = self.data[1]
+        self.x_offset = int(self.data[2:4].hex(), base=16)
+        self.y_offset = int(self.data[4:6].hex(), base=16)
+        self.width = int(self.data[6:8].hex(), base=16)
+        self.height = int(self.data[8:10].hex(), base=16)
 
 class PaletteDefinitionSegment(BaseSegment):
 
@@ -151,6 +153,7 @@ class PaletteDefinitionSegment(BaseSegment):
         self.palette_id = self.data[0]
         self.version = self.data[1]
         self.palette = [(0, 0, 0, 0)]*256
+        # apparently slices out the relative PDS section and then from index two to the end finds out the modulo of 5 for palettes and stores it
         for entry in range(len(self.data[2:])//5):
             i = 2 + entry*5
             self.palette[self.data[i]] = tuple(self.data[i+1:i+5])
@@ -165,6 +168,8 @@ class ObjectDefinitionSegment(BaseSegment):
     
     def __init__(self, bytes_):
         BaseSegment.__init__(self, bytes_)
+        import pdb
+        pdb.set_trace()
         self.id = int(self.data[0:2].hex(), base=16)
         self.version = self.data[2]
         self.in_sequence = self.SEQUENCE[self.data[3]]
@@ -181,6 +186,7 @@ class EndSegment(BaseSegment):
     @property
     def is_end(self): return True
         
+
 SEGMENT_TYPE = {
     PDS: PaletteDefinitionSegment,
     ODS: ObjectDefinitionSegment,
