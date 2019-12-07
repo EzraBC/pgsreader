@@ -168,8 +168,6 @@ class ObjectDefinitionSegment(BaseSegment):
     
     def __init__(self, bytes_):
         BaseSegment.__init__(self, bytes_)
-        import pdb
-        pdb.set_trace()
         self.id = int(self.data[0:2].hex(), base=16)
         self.version = self.data[2]
         self.in_sequence = self.SEQUENCE[self.data[3]]
