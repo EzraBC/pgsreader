@@ -1,19 +1,19 @@
 import numpy as np
 from PIL import Image
 
-def read_rle_bytes(bytes_):
+def read_rle_bytes(ods_bytes):
 
     pixels = []
     line_builder = []
 
     i = 0
-    while i < len(bytes_):
-        if bytes_[i]:
+    while i < len(ods_bytes):
+        if ods_bytes[i]:
             incr = 1
-            color = bytes_[i]
+            color = ods_bytes[i]
             length = 1
         else:
-            check = bytes_[i+1]
+            check = ods_bytes[i+1]
             if check == 0:
                 incr = 2
                 color = 0
@@ -27,15 +27,15 @@ def read_rle_bytes(bytes_):
             elif check < 128:
                 incr = 3
                 color = 0
-                length = ((check - 64) << 8) + bytes_[i + 2]
+                length = ((check - 64) << 8) + ods_bytes[i + 2]
             elif check < 192:
                 incr = 3
-                color = bytes_[i+2]
+                color = ods_bytes[i+2]
                 length = check - 128
             else:
                 incr = 4
-                color = bytes_[i+3]
-                length = ((check - 192) << 8) + bytes_[i + 2]
+                color = ods_bytes[i+3]
+                length = ((check - 192) << 8) + ods_bytes[i + 2]
         line_builder.extend([color]*length)
         i += incr
 
