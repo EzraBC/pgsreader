@@ -20,22 +20,22 @@ def read_rle_bytes(bytes_):
                 length = 0
                 pixels.append(line_builder)
                 line_builder = []
-            elif check < int('01000000', 2):
+            elif check < 64:
                 incr = 2
                 color = 0
                 length = check
-            elif check < int('10000000', 2):
+            elif check < 128:
                 incr = 3
                 color = 0
-                length = int(bin(check)[-6:] + bin(bytes_[i+2])[2:], 2)
-            elif check < int('11000000', 2):
+                length = ((check - 64) << 8) + bytes_[i + 2]
+            elif check < 192:
                 incr = 3
                 color = bytes_[i+2]
-                length = check - int('10000000', 2)
+                length = check - 128
             else:
                 incr = 4
                 color = bytes_[i+3]
-                length = int(bin(check)[-6:] + bin(bytes_[i+2])[2:], 2)
+                length = ((check - 192) << 8) + bytes_[i + 2]
         line_builder.extend([color]*length)
         i += incr
 
