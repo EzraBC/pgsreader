@@ -47,9 +47,13 @@ def read_rle_bytes(bytes_):
 def ycbcr2rgb(ar):
     xform = np.array([[1, 0, 1.402], [1, -0.34414, -.71414], [1, 1.772, 0]])
     rgb = ar.astype(np.float)
+    # Subtracting by 128 the R and G channels
     rgb[:,[1,2]] -= 128
+    #.dot is multiplication of the matrices and xform.T is a transpose of the array axes
     rgb = rgb.dot(xform.T)
+    # Makes any pixel value greater than 255 just be 255 (Max for RGB colorspace)
     np.putmask(rgb, rgb > 255, 255)
+    # Sets any pixel value less than 0 to 0 (Min for RGB colorspace)
     np.putmask(rgb, rgb < 0, 0)
     return np.uint8(rgb)
 
