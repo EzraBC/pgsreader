@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+from os.path import split as pathsplit
 
 PDS = int('0x14', 16)
 ODS = int('0x15', 16)
@@ -12,8 +15,10 @@ class InvalidSegmentError(Exception):
 class PGSReader:
 
     def __init__(self, filepath):
+        self.filedir, self.file = pathsplit(filepath) 
         with open(filepath, 'rb') as f:
             self.bytes = f.read()
+            
 
     def make_segment(self, bytes_):
         cls = SEGMENT_TYPE[bytes_[10]]
