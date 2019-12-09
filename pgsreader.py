@@ -1,11 +1,12 @@
-class InvalidSegmentError(Exception):
-    '''raised when a segment does not match PGS specification'''
 
 PDS = int('0x14', 16)
 ODS = int('0x15', 16)
 PCS = int('0x16', 16)
 WDS = int('0x17', 16)
 END = int('0x80', 16)
+
+class InvalidSegmentError(Exception):
+    '''Raised when a segment does not match PGS specification'''
 
 
 class PGSReader:
