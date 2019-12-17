@@ -118,12 +118,10 @@ class PresentationCompositionSegment(BaseSegment):
         self._num_comps = self.data[10]
 
     @property
-    def composition_number(self): 
-        return self._num
+    def composition_number(self): return self._num
 
     @property
-    def composition_state(self): 
-        return self._state
+    def composition_state(self): return self._state
 
     @property
     def composition_objects(self):
