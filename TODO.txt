@@ -1,0 +1,4 @@
+- Detectection scheme for Japanese Subs (or others langcodes) that may mix both vertical and horizontal subs 
+- Fix Subtitle that do not have Image attribute but lack PDS info (particularly appears to be transitioning or Epoch ODS updates )
+- Swap CbCr Palette
+- Transform separate alpha to black straight away for OCR. Also apply brightness+contrast transformation to foreground text before merge
