@@ -57,12 +57,16 @@ def ycbcr2rgb(ar):
     np.putmask(rgb, rgb < 0, 0)
     return np.uint8(rgb)
 
-def px_rgb_a(ods, pds):
+def px_rgb_a(ods, pds, swap=False):
     px = read_rle_bytes(ods.img_data)
     px = np.array([[255]*(ods.width - len(l)) + l for l in px], dtype=np.uint8)
     
-    # Extract the YCbCrA palette data
-    ycbcr = np.array([(entry.Y, entry.Cr, entry.Cb) for entry in pds.palette])
+    # Extract the YCbCrA palette data, swapping channels if requested.
+    if swap = True:
+        ycbcr = np.array([(entry.Y, entry.Cb, entry.Cr) for entry in pds.palette])
+    else:
+        ycbcr = np.array([(entry.Y, entry.Cr, entry.Cb) for entry in pds.palette])
+    
     rgb = ycbcr2rgb(ycbcr)
     
     # Separate the Alpha channel from the YCbCr palette data
