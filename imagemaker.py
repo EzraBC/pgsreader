@@ -61,9 +61,11 @@ def px_rgb_a(ods, pds):
     px = read_rle_bytes(ods.img_data)
     px = np.array([[255]*(ods.width - len(l)) + l for l in px], dtype=np.uint8)
     
+    # Extract the YCbCrA palette data
     ycbcr = np.array([c[:-1] for c in pds.palette])
     rgb = ycbcr2rgb(ycbcr)
     
+    # Separate the Alpha channel from the YCbCr palette data
     a = [c[-1] for c in pds.palette]
     a = np.array([[a[x] for x in l] for l in px], dtype=np.uint8)
 
