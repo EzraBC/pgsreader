@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 
 from os.path import split as pathsplit
+from collections import namedtuple
 
+# Constants for Segments
 PDS = int('0x14', 16)
 ODS = int('0x15', 16)
 PCS = int('0x16', 16)
 WDS = int('0x17', 16)
 END = int('0x80', 16)
+
+# Named tuple access for static PDS palettes 
+Palette = namedtuple('Palette', "Y Cr Cb Alpha")
 
 class InvalidSegmentError(Exception):
     '''Raised when a segment does not match PGS specification'''
@@ -162,7 +167,7 @@ class PaletteDefinitionSegment(BaseSegment):
         # apparently slices out the relative PDS section and then from index two to the end finds out the modulo of 5 for palettes and stores it
         for entry in range(len(self.data[2:])//5):
             i = 2 + entry*5
-            self.palette[self.data[i]] = tuple(self.data[i+1:i+5])
+            self.palette[self.data[i]] = Palette(self.data[i+1:i+5])
 
 class ObjectDefinitionSegment(BaseSegment):
 
