@@ -62,10 +62,10 @@ def px_rgb_a(ods, pds, swap):
     px = np.array([[255]*(ods.width - len(l)) + l for l in px], dtype=np.uint8)
     
     # Extract the YCbCrA palette data, swapping channels if requested.
-    if swap = True:
-        ycbcr == np.array([(entry.Y, entry.Cb, entry.Cr) for entry in pds.palette])
+    if swap:
+        ycbcr = np.array([(entry.Y, entry.Cb, entry.Cr) for entry in pds.palette])
     else:
-        ycbcr == np.array([(entry.Y, entry.Cr, entry.Cb) for entry in pds.palette])
+        ycbcr = np.array([(entry.Y, entry.Cr, entry.Cb) for entry in pds.palette])
     
     rgb = ycbcr2rgb(ycbcr)
     
