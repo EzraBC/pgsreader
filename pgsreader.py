@@ -163,7 +163,7 @@ class PaletteDefinitionSegment(BaseSegment):
         BaseSegment.__init__(self, bytes_)
         self.palette_id = self.data[0]
         self.version = self.data[1]
-        self.palette = [(0, 0, 0, 0)]*256
+        self.palette = [Palette(0, 0, 0, 0)]*256
         # Slice from byte 2 til end of segment. Divide by 5 to determine number of palette entries
         # Iterate entries. Explode the 5 bytes into namedtuple Palette. Must be exploded
         for entry in range(len(self.data[2:])//5):
