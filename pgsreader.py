@@ -164,10 +164,11 @@ class PaletteDefinitionSegment(BaseSegment):
         self.palette_id = self.data[0]
         self.version = self.data[1]
         self.palette = [(0, 0, 0, 0)]*256
-        # apparently slices out the relative PDS section and then from index two to the end finds out the modulo of 5 for palettes and stores it
+        # Slice from byte 2 til end of segment. Divide by 5 to determine number of palette entries
+        # Iterate entries. Explode the 5 bytes into namedtuple Palette. Must be exploded
         for entry in range(len(self.data[2:])//5):
             i = 2 + entry*5
-            self.palette[self.data[i]] = Palette(self.data[i+1:i+5])
+            self.palette[self.data[i]] = Palette(*self.data[i+1:i+5])
 
 class ObjectDefinitionSegment(BaseSegment):
 
