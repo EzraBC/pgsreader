@@ -1,17 +1,29 @@
-class InvalidSegmentError(Exception):
-    '''raised when a segment does not match PGS specification'''
+#!/usr/bin/env python3
 
+from os.path import split as pathsplit
+from collections import namedtuple
+
+# Constants for Segments
 PDS = int('0x14', 16)
 ODS = int('0x15', 16)
 PCS = int('0x16', 16)
 WDS = int('0x17', 16)
 END = int('0x80', 16)
 
+# Named tuple access for static PDS palettes 
+Palette = namedtuple('Palette', "Y Cr Cb Alpha")
+
+class InvalidSegmentError(Exception):
+    '''Raised when a segment does not match PGS specification'''
+
+
 class PGSReader:
 
     def __init__(self, filepath):
+        self.filedir, self.file = pathsplit(filepath) 
         with open(filepath, 'rb') as f:
             self.bytes = f.read()
+            
 
     def make_segment(self, bytes_):
         cls = SEGMENT_TYPE[bytes_[10]]
@@ -111,7 +123,7 @@ class PresentationCompositionSegment(BaseSegment):
         self._num_comps = self.data[10]
 
     @property
-    def composition_number(self): self._num
+    def composition_number(self): return self._num
 
     @property
     def composition_state(self): return self._state
@@ -138,11 +150,12 @@ class WindowDefinitionSegment(BaseSegment):
 
     def __init__(self, bytes_):
         BaseSegment.__init__(self, bytes_)
-        self.window_id = self.data[0]
-        self.x_offset = int(self.data[1:3].hex(), base=16)
-        self.y_offset = int(self.data[3:5].hex(), base=16)
-        self.width = int(self.data[5:7].hex(), base=16)
-        self.height = int(self.data[7:9].hex(), base=16)
+        self.num_windows = self.data[0]
+        self.window_id = self.data[1]
+        self.x_offset = int(self.data[2:4].hex(), base=16)
+        self.y_offset = int(self.data[4:6].hex(), base=16)
+        self.width = int(self.data[6:8].hex(), base=16)
+        self.height = int(self.data[8:10].hex(), base=16)
 
 class PaletteDefinitionSegment(BaseSegment):
 
@@ -150,10 +163,12 @@ class PaletteDefinitionSegment(BaseSegment):
         BaseSegment.__init__(self, bytes_)
         self.palette_id = self.data[0]
         self.version = self.data[1]
-        self.palette = [(0, 0, 0, 0)]*256
+        self.palette = [Palette(0, 0, 0, 0)]*256
+        # Slice from byte 2 til end of segment. Divide by 5 to determine number of palette entries
+        # Iterate entries. Explode the 5 bytes into namedtuple Palette. Must be exploded
         for entry in range(len(self.data[2:])//5):
             i = 2 + entry*5
-            self.palette[self.data[i]] = tuple(self.data[i+1:i+5])
+            self.palette[self.data[i]] = Palette(*self.data[i+1:i+5])
 
 class ObjectDefinitionSegment(BaseSegment):
 
@@ -181,6 +196,7 @@ class EndSegment(BaseSegment):
     @property
     def is_end(self): return True
         
+
 SEGMENT_TYPE = {
     PDS: PaletteDefinitionSegment,
     ODS: ObjectDefinitionSegment,
